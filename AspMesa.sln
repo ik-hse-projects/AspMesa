@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspMesa", "AspMesa\AspMesa.csproj", "{F19F5CF7-3E39-40A0-8142-72E45F7E6384}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspMesa.Tests", "AspMesa.Tests\AspMesa.Tests.csproj", "{B75EDFC2-F766-404D-95E1-D63FCEBD1629}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F19F5CF7-3E39-40A0-8142-72E45F7E6384}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F19F5CF7-3E39-40A0-8142-72E45F7E6384}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F19F5CF7-3E39-40A0-8142-72E45F7E6384}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F19F5CF7-3E39-40A0-8142-72E45F7E6384}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B75EDFC2-F766-404D-95E1-D63FCEBD1629}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B75EDFC2-F766-404D-95E1-D63FCEBD1629}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B75EDFC2-F766-404D-95E1-D63FCEBD1629}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B75EDFC2-F766-404D-95E1-D63FCEBD1629}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
