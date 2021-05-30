@@ -1,8 +1,10 @@
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
 namespace AspMesa.Tests
@@ -24,11 +26,18 @@ namespace AspMesa.Tests
     public class IntegrationTests
     {
         private readonly HttpClient _client;
+        private readonly TestStorage _storage;
 
         public IntegrationTests()
         {
+            // Мы не хотим работать с файловой системой во время тестов,
+            // поэтому будем использовать простенький TestStorage
+            _storage = new TestStorage();
+
             // Быстренько поднимаем тестовый сервер и создаём HttpClient, чтобы в него тыкать.
-            var server = new TestServer(new WebHostBuilder().UseStartup<Startup>());
+            var server = new TestServer(new WebHostBuilder()
+                .ConfigureServices(services => services.AddSingleton(typeof(IStorage), _storage))
+                .UseStartup<Startup>());
             _client = server.CreateClient();
         }
 
@@ -112,6 +121,11 @@ namespace AspMesa.Tests
             // Assert
             response.EnsureSuccessStatusCode();
             Assert.Equal(@"{ }", content);
+
+            Assert.NotEmpty(_storage.Users);
+            var user = _storage.Users.Last();
+            Assert.Equal(name, user.UserName);
+            Assert.Equal(email, user.Email);
         }
 
         /// <summary>
@@ -137,6 +151,10 @@ namespace AspMesa.Tests
 
             Assert.Equal(HttpStatusCode.BadRequest, second.StatusCode);
             Assert.Equal(@"{ ""error"": ""Email already taken"" }", secondContent);
+
+            var user = Assert.Single(_storage.Users);
+            Assert.Equal("Dolly", user.UserName);
+            Assert.Equal("sheep@dolly.com", user.Email);
         }
 
         /// <summary>
@@ -147,6 +165,8 @@ namespace AspMesa.Tests
         {
             await CreateUser("Bob", "bob@gmail.com");
             await CreateUser("Bob", "bob@yandex.ru");
+
+            Assert.Equal(2, _storage.Users.Count);
         }
 
         #endregion
@@ -234,7 +254,7 @@ namespace AspMesa.Tests
             response.EnsureSuccessStatusCode();
             Assert.Equal(@"[]", content);
         }
-        
+
         // TODO:  Пагинация
 
         #endregion
@@ -251,8 +271,7 @@ namespace AspMesa.Tests
             await CreateUser("Real John", "John@example.org");
             await CreateUser("Not a Bob", "Bob@hse.ru");
             var url = "/api/Send";
-            var message =
-                @"Subject: Test message
+            var message = @"Subject: Test message
 From: John@example.org
 To: Bob@hse.ru
 
@@ -267,6 +286,12 @@ This is a second line.
             // Assert
             response.EnsureSuccessStatusCode();
             Assert.Equal("{}", content);
+
+            var mail = Assert.Single(_storage.Messages);
+            Assert.Equal("Test message", mail.Subject);
+            Assert.Equal("John@example.org", mail.SenderId);
+            Assert.Equal("Bob@hse.ru", mail.ReceiverId);
+            Assert.Equal("Hello world!!\nThis is a second line.\n", mail.Message);
         }
 
         /// <summary>
@@ -287,6 +312,7 @@ This is a second line.
             // Assert
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
             Assert.Equal(@"{""error"": ""Sender not found""}", content);
+            Assert.Empty(_storage.Messages);
         }
 
         /// <summary>
@@ -307,10 +333,11 @@ This is a second line.
             // Assert
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
             Assert.Equal(@"{""error"": ""Receiver not found""}", content);
+            Assert.Empty(_storage.Messages);
         }
 
         #endregion
-        
+
         // TODO: Список сообщений
     }
 }
